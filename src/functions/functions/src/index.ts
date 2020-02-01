@@ -22,36 +22,40 @@ exports.sendSMS = functions.https.onCall((message, context) => {
     else {
         return new Promise((resolve, reject) => {
             if (context && context.auth && context.auth.uid) {
-                const RC = require('ringcentral');
-                var rcsdk = new RC({
-                    server: 'https://platform.devtest.ringcentral.com',
-                    appKey: 'V7rYmANzRBuRGOHstcNTuw',
-                    appSecret: 'nnL15dl-QkOmpuKEctC1_AicAI8YdZQzycOBlUEyZXzQ'
-                });
-                var platform = rcsdk.platform();
-                platform.login({
-                    username: '+15872875381',
-                    password: '75315948620sA',
-                    extension: '101'
-                })
-                    .then(function () {
-                        if (message.to === null || message === null) {
+                const accountSid = 'AC79a0bfe9a658c909192e77ee8c601f4c';
+                const authToken = '85738128870ce24bee20b7fd7f10f00b';
+                const client = require('twilio')(accountSid, authToken);
+
+                if (message.to === null || message.bodyType === null) {
+                    reject(false);
+                }
+                else {
+                    let body;
+                    if (message.bodyType == 1) {
+                        body = "Hi" + (message.name ? (" " + message.name + ", ") : "! ") + "It's Teco Taxi. Your cab" + (message.cabNum ? ("# " + message.cabNum) + " will be here in about 10 minutes" : " will be here in about 10 minutes");
+                    }
+                    else if (message.bodyType == 2) {
+                        body = "Hi" + (message.name ? (" " + message.name + ", ") : "! ") + "It's Teco Taxi. Your cab" + (message.cabNum ? ("# " + message.cabNum) + " will be here in about 10 minutes" : " will be here in about 5 minutes");
+                    }
+                    else if (message.bodyType == 3) {
+                        body = "Hi" + (message.name ? (" " + message.name + ", ") : "! ") + "It's Teco Taxi. Your cab" + (message.cabNum ? ("# " + message.cabNum) + " is almost here!" : " is almost here!");
+                    }
+                    else {
+                        reject(false);
+                    }
+                    client.messages
+                        .create({
+                            body: body,
+                            from: '+12076058641',
+                            to: message.to
+                        })
+                        .then(function () {
+                            resolve(true);
+                        })
+                        .catch(function () {
                             reject(false);
-                        }
-                        else {
-                            platform.post('/account/~/extension/~/sms', {
-                                from: { 'phoneNumber': '+15872875381' },
-                                to: [{ 'phoneNumber': message.to }],
-                                text: message.body,
-                            })
-                                .then(function () {
-                                    resolve(true);
-                                })
-                                .catch(function () {
-                                    reject(false);
-                                });
-                        }
-                    });
+                        });
+                }
             }
         });
     }
@@ -66,19 +70,44 @@ exports.addUserAsAdmin = functions.https.onCall((data, context) => {
     }
     else {
         // get user and add a custom claim (Admin)
-        return admin.auth().getUserByEmail(data.email).then(user => {
-            return admin.auth().setCustomUserClaims(user.uid, {
-                admin: true,
-                employee: true,
-            })
-        })
-            .then(() => {
-                return { message: 'Admin have been added successfully' }
+        return admin.auth().getUserByEmail(data.email)
+            .then((user: any) => {
+                console.log(user);
+                if (user && user['customClaims'] && user['customClaims']['admin'] === true) {
+                    return new functions.https.HttpsError('cancelled', 'This admin already exists', 1);
+                }
+                else if (user && user['customClaims'] && (user['customClaims']['employee'] === true)) {
+                    console.log("lolololo")
+                    admin.auth().setCustomUserClaims(user.uid, {
+                        admin: true,
+                        employee: true,
+                    })
+                        .then(() => {
+                            return { message: 'Admin have been added successfully' }
+                        })
+                        .catch(error => {
+                            console.log("Internal error: " + error);
+                        })
+                    return true;
+                }
+                else {
+                    return new functions.https.HttpsError('cancelled', 'user does not exist', 2);
+                }
             })
             .catch((error) => {
                 console.log(error);
             })
     }
+});
+
+exports.userData = functions.https.onCall((data, context) => {
+    return admin.auth().getUserByEmail(data.user)
+            .then((user: any) => {
+                console.log(user)
+            })
+            .catch((error) => {
+                console.log(error);
+            })
 });
 
 exports.addUserAsEmployee = functions.https.onCall((data, context) => {
@@ -89,7 +118,7 @@ exports.addUserAsEmployee = functions.https.onCall((data, context) => {
         return undefined;
     }
     else {
-        // get user and add a custom claim (Admin)
+        // get user and add a custom claim (employee)
         return admin.auth().getUserByEmail(data.email).then(user => {
             return admin.auth().setCustomUserClaims(user.uid, {
                 employee: true,

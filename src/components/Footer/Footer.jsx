@@ -31,16 +31,16 @@ class Footer extends React.Component {
             <ul>
               <li>
                 <a
-                  href="https://www.creative-tim.com?ref=nudr-footer"
+                  href="https://tecotaxi.com/"
                   className="mr-4-px"
                   target="_blank"
                 >
-                  Creative Tim
+                  Teco Taxi
                 </a>
               </li>
               <li>
                 <a
-                  href="https://presentation.creative-tim.com?ref=nudr-footer"
+                  href="https://tecotaxi.com/about/"
                   className="mr-4-px"
                   target="_blank"
                 >
@@ -49,16 +49,17 @@ class Footer extends React.Component {
               </li>
               <li>
                 <a
-                  href="https://blog.creative-tim.com?ref=nudr-footer"
+                  href="https://tecotaxi.com/services/"
                   target="_blank"
                 >
-                  Blog
+                  Services
                 </a>
               </li>
             </ul>
           </nav>
           <div className="copyright">
-            &copy; {1900 + new Date().getYear()}, Designed by{" "}
+            &copy; {1900 + new Date().getYear()}
+            {/* , Designed by{" "}
             <a href="https://www.invisionapp.com" target="_blank">
               Invision
             </a>
@@ -69,7 +70,7 @@ class Footer extends React.Component {
             >
               Creative Tim
             </a>
-            .
+            . */}
           </div>
         </Container>
       </footer>

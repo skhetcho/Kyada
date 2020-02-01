@@ -28,7 +28,7 @@ import ValidationForms from "views/Forms/ValidationForms.jsx";
 import Wizard from "views/Forms/Wizard/Wizard.jsx";
 import RegularTables from "views/Tables/RegularTables.jsx";
 import ExtendedTables from "views/Tables/ExtendedTables.jsx";
-import ReactTable from "views/Tables/ReactTable.jsx";
+import ReactTable from "views/Couponizer/ReactTable.jsx/index.js";
 import GoogleMaps from "views/Maps/GoogleMaps.jsx";
 import FullScreenMap from "views/Maps/FullScreenMap.jsx";
 import VectorMap from "views/Maps/VectorMap.jsx";

@@ -21,22 +21,30 @@
 import Dashboard from "views/Dashboard/Dashboard.jsx";
 // import LoginPage from "views/Pages/LoginPage.jsx";
 import Snotify from "views/Snotify/Snotify.jsx";
+import Couponizer from "views/Couponizer/Couponizer.jsx";
 
 let routes = [
-  {
-    path: "/dashboard",
-    name: "Dashboard",
-    icon: "now-ui-icons design_app",
-    component: Dashboard,
-    layout: "/admin"
-  },
+  // {
+  //   path: "/dashboard",
+  //   name: "Dashboard",
+  //   icon: "now-ui-icons design_app",
+  //   component: Dashboard,
+  //   layout: "/admin"
+  // },
   {
     path: "/snotify",
     name: "Snotify",
     icon: "now-ui-icons ui-2_chat-round",
     component: Snotify,
     layout: "/admin"
-  }
+  },
+  // {
+  //   path: "/couponizer",
+  //   name: "Couponizer",
+  //   icon: "now-ui-icons shopping_tag-content",
+  //   component: Couponizer,
+  //   layout: "/admin"
+  // }
 ];
 
 export default routes;

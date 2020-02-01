@@ -1,0 +1,28 @@
+[
+    {
+      "campaign": "MR-1",
+      "holders": [
+        {
+            "name": "Tiger Nixon",
+            "coupon": "C5Q13T"
+        },
+        {
+            "name": "Garrett Winters",
+            "coupon": "P09W13"
+        },
+        {
+            "name": "Jonathan Halt",
+            "coupon": "5SYJH1"
+        }
+      ]
+    },
+    {
+      "campaign": "MR-2",
+      "holders":[
+        {
+            "name": "Ashton Cox",
+            "coupon": "G252AC"
+        }
+      ]
+    }
+]

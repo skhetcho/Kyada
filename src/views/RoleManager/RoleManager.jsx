@@ -46,25 +46,51 @@ class RoleManager extends React.Component {
     super(props);
     this.state = {
       email: "",
+
+      newUserName: "",
       newUserEmail: "",
       newUserPassword: "",
-      submitting: false,
+      newUserConfirmPassword: "",
+
+      submittingMakeAdmin: false,
       submittingUserProfileCreate: false,
+
       error: false,
       errorUserNotFound: false,
     };
-    this.onSubmit = this.onSubmit.bind(this);
+    this.onSubmitMakeAdmin = this.onSubmitMakeAdmin.bind(this);
     this.onHandleChange = this.onHandleChange.bind(this);
   }
   notificationAlert = React.createRef();
-  onSubmit(event) {
+  onSubmitMakeAdmin(event) {
     event.preventDefault();
-    this.setState({ submitting: true })
+    this.setState({ submittingMakeAdmin: true })
     const addUserAsAdmin = Firebase.functions().httpsCallable('addUserAsAdmin');
     addUserAsAdmin({ email: this.state.email })
+      .then((response) => {
+        console.log(response)
+        if (response.data.details === 2) {
+          this.setState({ submittingMakeAdmin: false, errorUserNotFound: true }, () => {
+            this.toggleModal();
+          })
+        }
+      })
+      .catch((error) => {
+        this.setState({ submittingMakeAdmin: false });
+        console.log(error)
+      })
+  }
+  onSubmitUserProfileCreate(event) {
+    event.preventDefault();
+    this.setState({ submittingUserProfileCreate: true })
+    const addUserAsEmployee = Firebase.functions().httpsCallable('addUserAsEmployee');
+    /////
+    //the company name is hardcoded, fix it for later use and scalability
+    /////
+    addUserAsEmployee({ company: "tecotaxi", name: this.state.newUserName, email: this.state.newUserEmail, password: newUserPassword })
       .then((res) => {
         if (res !== Object) {
-          this.setState({ submitting: false, errorUserNotFound: true }, () => {
+          this.setState({ submittingMakeAdmin: false, errorUserNotFound: true }, () => {
             this.toggleModal();
           })
         }
@@ -72,6 +98,11 @@ class RoleManager extends React.Component {
       .catch(() => {
         this.setState({ error: true })
       })
+  }
+  checkUserData() {
+    event.preventDefault();
+    const userData = Firebase.functions().httpsCallable('userData');
+    userData({ user: "souren@khetcho.com"})
   }
   onHandleChange(event) {
     const name = event.target.getAttribute('name');
@@ -93,7 +124,7 @@ class RoleManager extends React.Component {
             <div className="header text-center">
               <h2 className="title">Role Manager</h2>
               <p className="category">
-                Manage Platform Users, Add Admins and Delegate With Ease
+                Manage Platform Users, Add Admins and Delegate With Ease<button style={{ fontSize: 10, backgroundColor: 'transparent', border: 'solid', borderWidth: 1, paddingLeft: 3, paddingRight: 3, borderColor: 'rgba(255, 255, 255, 0.5)', borderRadius: 5, marginLeft: 5, color: 'rgba(255, 255, 255, 0.5)' }}>?</button>
               </p>
             </div>
           }
@@ -103,34 +134,9 @@ class RoleManager extends React.Component {
             <Col xs={12} md={5} className="ml-auto mr-auto">
               <Card className="card-calendar">
                 <CardBody>
-                  <form onSubmit={this.onSubmit}>
+                  <form onSubmit={this.onSubmitMakeAdmin}>
                     <FormGroup>
-                      <Label>Make Admins: </Label>
-                      <Input
-                        type="email"
-                        name="email"
-                        id="email"
-                        placeholder="Enter the email of a user to make them an admin..."
-                        value={this.state.email}
-                        onChange={this.onHandleChange}
-                        style={{ marginTop: 5 }}
-                      />
-                    </FormGroup>
-                    <Button disabled={this.state.submittingUserProfileCreate} style={{ width: 103, marginTop: 10 }} color="info" type="submit" className="mt-3">
-                      Empower
-                    </Button>
-                  </form>
-                </CardBody>
-              </Card>
-            </Col>
-          </Row>
-          <Row style={{ marginTop: 100 }}>
-            <Col xs={12} md={5} className="ml-auto mr-auto">
-              <Card className="card-calendar">
-                <CardBody>
-                  <form onSubmit={this.onSubmit}>
-                    <FormGroup>
-                      <Label>Register New Users:</Label>
+                      <Label>Register a New User:</Label>
                       <Input
                         type="email"
                         name="newUserEmail"
@@ -147,7 +153,16 @@ class RoleManager extends React.Component {
                         placeholder="New User Password"
                         value={this.state.newUserPassword}
                         onChange={this.onHandleChange}
-                        style={{ marginTop: 5 }}
+                        style={{ marginTop: 7 }}
+                      />
+                      <Input
+                        type="password"
+                        name="newUserPassword"
+                        id="newUserPassword"
+                        placeholder="Confirm Password"
+                        value={this.state.newUserPassword}
+                        onChange={this.onHandleChange}
+                        style={{ marginTop: 7 }}
                       />
                     </FormGroup>
                     <Button disabled={this.state.submittingUserProfileCreate} style={{ width: 100 }} color="info" type="submit" className="mt-3">
@@ -158,10 +173,38 @@ class RoleManager extends React.Component {
               </Card>
             </Col>
           </Row>
+          <Row style={{ marginTop: 100 }}>
+            <Col xs={12} md={5} className="ml-auto mr-auto">
+              <Card className="card-calendar">
+                <CardBody>
+                  <form onSubmit={this.onSubmitMakeAdmin}>
+                    <FormGroup>
+                      <Label>Make Admins: </Label>
+                      <Input
+                        type="email"
+                        name="email"
+                        id="email"
+                        placeholder="Enter the email of a user to make them an admin..."
+                        value={this.state.email}
+                        onChange={this.onHandleChange}
+                        style={{ marginTop: 5 }}
+                      />
+                    </FormGroup>
+                    <Button disabled={this.state.submittingMakeAdmin} style={{ width: 103, marginTop: 10 }} color="info" type="submit" className="mt-3">
+                      Empower
+                    </Button>
+                  </form>
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+          <Button style={{ width: 103, marginTop: 10 }} color="info" onClick={() => this.checkUserData()} className="mt-3">
+            checkUserData
+          </Button>
         </div>
         <Modal isOpen={this.state.error} toggle={this.toggleModal}>
           <ModalHeader className="justify-content-center" toggle={this.toggleModal}>
-            {this.state.errorUserNotFound ? "Finding Issue" : "Error while sending the message"}
+            {this.state.errorUserNotFound ? "Finding Issue" : "Error while handling your request"}
           </ModalHeader>
           <ModalBody>
             {this.state.errorUserNotFound ? "This email doesn't seem to belong to any of your users, are you sure you registered them first?" : "Something went wrong with the requst. Reach out to us for assistance"}
