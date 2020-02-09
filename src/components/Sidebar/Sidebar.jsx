@@ -1,17 +1,6 @@
 /*!
 
-=========================================================
-* Now UI Dashboard PRO React - v1.3.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/now-ui-dashboard-pro-react
-* Copyright 2019 Creative Tim (https://www.creative-tim.com)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+coded by Kyada
 
 */
 /*eslint-disable*/
@@ -24,10 +13,13 @@ import PerfectScrollbar from "perfect-scrollbar";
 
 // reactstrap components
 import { Nav, Collapse, Button } from "reactstrap";
+// firebase
+import Firebase from "fbConfig/fbConfig";
 
 // core components
-import avatar from "assets/img/ryan.jpg";
-import logo from "logo-white.svg";
+import avatar from "assets/img/userProfile.jpg";
+import logo from "assets/img/sqrl.png";
+
 
 var ps;
 
@@ -36,6 +28,7 @@ class Sidebar extends React.Component {
     super(props);
     this.state = {
       openAvatar: false,
+      name: "",
       ...this.getCollapseStates(props.routes)
     };
     this.sidebar = React.createRef();
@@ -47,6 +40,10 @@ class Sidebar extends React.Component {
         suppressScrollY: false
       });
     }
+    Firebase.auth().currentUser.getIdTokenResult()
+      .then((idTokenResult) => {
+        this.setState({name: idTokenResult.claims.name})
+      })
   }
   componentWillUnmount() {
     if (navigator.platform.indexOf("Win") > -1) {
@@ -116,14 +113,14 @@ class Sidebar extends React.Component {
                   </p>
                 </>
               ) : (
-                <>
-                  <span className="sidebar-mini-icon">{prop.mini}</span>
-                  <span className="sidebar-normal">
-                    {prop.name}
-                    <b className="caret" />
-                  </span>
-                </>
-              )}
+                  <>
+                    <span className="sidebar-mini-icon">{prop.mini}</span>
+                    <span className="sidebar-normal">
+                      {prop.name}
+                      <b className="caret" />
+                    </span>
+                  </>
+                )}
             </a>
             <Collapse isOpen={this.state[prop.state]}>
               <ul className="nav">{this.createLinks(prop.views)}</ul>
@@ -140,11 +137,11 @@ class Sidebar extends React.Component {
                 <p>{prop.name}</p>
               </>
             ) : (
-              <>
-                <span className="sidebar-mini-icon">{prop.mini}</span>
-                <span className="sidebar-normal">{prop.name}</span>
-              </>
-            )}
+                <>
+                  <span className="sidebar-mini-icon">{prop.mini}</span>
+                  <span className="sidebar-normal">{prop.name}</span>
+                </>
+              )}
           </NavLink>
         </li>
       );
@@ -173,7 +170,7 @@ class Sidebar extends React.Component {
               className="simple-text logo-normal"
               target="_blank"
             >
-              Creative Tim
+              Teco Taxi
             </a>
             <div className="navbar-minimize">
               <Button
@@ -196,7 +193,7 @@ class Sidebar extends React.Component {
               </div>
               <div className="info">
                 <a
-                  href="#pablo"
+                  href="#dropdown"
                   data-toggle="collapse"
                   aria-expanded={this.state.openAvatar}
                   onClick={() =>
@@ -204,13 +201,14 @@ class Sidebar extends React.Component {
                   }
                 >
                   <span>
-                    Ryan Gosling
+                    {this.state.name}
                     <b className="caret" />
                   </span>
                 </a>
                 <Collapse isOpen={this.state.openAvatar}>
                   <ul className="nav">
-                    <li>
+                    {/* Implement profile navigation */}
+                    {/* <li>
                       <a href="#pablo" onClick={e => e.preventDefault}>
                         <span className="sidebar-mini-icon">MP</span>
                         <span className="sidebar-normal">My Profile</span>
@@ -221,11 +219,11 @@ class Sidebar extends React.Component {
                         <span className="sidebar-mini-icon">EP</span>
                         <span className="sidebar-normal">Edit Profile</span>
                       </a>
-                    </li>
+                    </li> */}
                     <li>
-                      <a href="#pablo" onClick={e => e.preventDefault}>
-                        <span className="sidebar-mini-icon">S</span>
-                        <span className="sidebar-normal">Settings</span>
+                      <a href="#pablo" onClick={() => Firebase.auth().signOut()}>
+                        <span className="sidebar-mini-icon">O</span>
+                        <span className="sidebar-normal">Log out</span>
                       </a>
                     </li>
                   </ul>
@@ -244,7 +242,7 @@ Sidebar.defaultProps = {
   routes: [],
   showNotification: false,
   backgroundColor: "blue",
-  minimizeSidebar: () => {}
+  minimizeSidebar: () => { }
 };
 
 Sidebar.propTypes = {

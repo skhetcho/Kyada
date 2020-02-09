@@ -27,6 +27,7 @@ import Footer from "components/Footer/Footer.jsx";
 import Sidebar from "components/Sidebar/Sidebar.jsx";
 import adminRoutes from "routes.js";
 import employeeRoutes from "routes_employee.js";
+import Firebase from "fbConfig/fbConfig";
 
 var ps;
 
@@ -34,8 +35,19 @@ class Admin extends React.Component {
   state = {
     sidebarMini: false,
     backgroundColor: "blue",
-    isAdmin: true,
+    isAdmin: false,
   };
+  componentWillMount() {
+    Firebase.auth().currentUser.getIdTokenResult()
+    .then((idTokenResult) => {
+      if (idTokenResult.claims.admin){
+        this.setState({isAdmin: true});
+      }
+    })
+    .catch((error) => {
+      console.log("something went wrong")
+    })
+  }
   notificationAlert = React.createRef();
   mainPanel = React.createRef();
   componentDidMount() {

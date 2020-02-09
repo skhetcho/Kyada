@@ -138,7 +138,7 @@ class AdminNavbar extends React.Component {
           >
             <form>
               <InputGroup className="no-border">
-                <Input placeholder="Search..." />
+                <Input placeholder="Currently unavailable..." />
 
                 <InputGroupAddon addonType="append">
                   <InputGroupText>
@@ -147,7 +147,8 @@ class AdminNavbar extends React.Component {
                 </InputGroupAddon>
               </InputGroup>
             </form>
-            <Nav navbar>
+            {/* navigation to be implemented in the future*/}
+            {/* <Nav navbar>
               <NavItem>
                 <Link to="#pablo" className="nav-link">
                   <i className="now-ui-icons media-2_sound-wave" />
@@ -181,7 +182,7 @@ class AdminNavbar extends React.Component {
                   </p>
                 </Link>
               </NavItem>
-            </Nav>
+            </Nav> */}
           </Collapse>
         </Container>
       </Navbar>

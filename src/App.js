@@ -41,7 +41,7 @@ const App = () => {
                         path="/icons"
                         component={Icons}
                     />
-                    <Redirect from='/' to='/admin/dashboard' />
+                    <Redirect from='/' to='/admin/snotify' />
                 </Switch>
             </Router>
         </AuthProvider>

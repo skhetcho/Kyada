@@ -1,8 +1,8 @@
 {
-  "name": "now-ui-dashboard-pro-react",
-  "version": "1.3.0",
+  "name": "kyada",
+  "version": "1.0.0",
   "private": true,
-  "homepage": "https://creativetimofficial.github.io/now-ui-dashboard-pro-react/#/documentation/tutorial",
+  "homepage": "https://app.tecotaxi.com",
   "dependencies": {
     "@sentry/browser": "^5.10.2",
     "bootstrap": "4.3.1",

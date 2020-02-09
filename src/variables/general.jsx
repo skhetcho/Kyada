@@ -22,7 +22,7 @@ import {
   DropdownItem
 } from "reactstrap";
 
-import taskImage1 from "assets/img/ryan.jpg";
+import taskImage1 from "assets/img/userProfile.jpg";
 import taskImage2 from "assets/img/eva.jpg";
 
 import taskRTLImage1 from "assets/img/emilyz.jpg";
