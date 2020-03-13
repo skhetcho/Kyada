@@ -21,7 +21,7 @@ import avatar from "assets/img/userProfile.jpg";
 import logo from "assets/img/sqrl.png";
 
 
-var ps;
+var ps;  
 
 class Sidebar extends React.Component {
   constructor(props) {

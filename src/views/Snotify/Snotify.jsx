@@ -4,13 +4,6 @@
 /*eslint-disable*/
 import React from "react";
 
-import {
-  FormGroup,
-  Label,
-  Input,
-  FormText,
-  Button
-} from "reactstrap";
 
 //3rd party components
 import NotificationAlert from "react-notification-alert";
@@ -18,6 +11,8 @@ import NotificationAlert from "react-notification-alert";
 // reactstrap components
 import { Card, CardBody, Row, Col } from "reactstrap";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { FormGroup, Label, Input, Button } from "reactstrap";
+
 
 // core components
 import PanelHeader from "components/PanelHeader/PanelHeader.jsx";
@@ -44,12 +39,19 @@ class Snotify extends React.Component {
     this.onHandleChange = this.onHandleChange.bind(this);
   }
   notificationAlert = React.createRef();
+
+  userDatalist() {
+    const userData = Firebase.functions().httpsCallable('userData');
+    userData({user: "rakesh@troisinfotech.ca"});
+  }
+
   onSubmit(event) {
     event.preventDefault();
     this.setState({ submitting: true });
     const sendSMS = Firebase.functions().httpsCallable('sendSMS');
-    sendSMS({ to: this.state.message.to, name: this.state.message.name, cabNum: this.state.message.cabNum, bodyType: this.state.selectedOption})
+    sendSMS({ to: this.state.message.to, name: this.state.message.name, cabNum: this.state.message.cabNum, bodyType: this.state.selectedOption })
       .then(() => {
+
         this.setState({
           error: false,
           submitting: false,
@@ -150,7 +152,7 @@ class Snotify extends React.Component {
                     </FormGroup>
                     <FormGroup check className="form-check-radio">
                       <Label>* Message: </Label>
-                      <br/>
+                      <br />
                       <Label check>
                         <Input
                           defaultValue="1"
@@ -161,7 +163,7 @@ class Snotify extends React.Component {
                         />
                         10 Min<span className="form-check-sign" />
                       </Label>
-                      <br/>
+                      <br />
                       <Label check>
                         <Input
                           defaultValue="2"
@@ -172,7 +174,7 @@ class Snotify extends React.Component {
                         />
                         5 Min<span className="form-check-sign" />
                       </Label>
-                      <br/>
+                      <br />
                       <Label check>
                         <Input
                           defaultValue="3"
@@ -196,6 +198,9 @@ class Snotify extends React.Component {
                       Send
                     </Button>
                   </form>
+                  <Button style={{ width: 100 }} color="info" onClick={() => this.userDatalist()} className="mt-3">
+                      zzz
+                    </Button>
                 </CardBody>
               </Card>
             </Col>

@@ -160,7 +160,7 @@ class RoleManager extends React.Component {
   checkUserData() {
     event.preventDefault();
     const userData = Firebase.functions().httpsCallable('userData');
-    userData({ user: "rakesh@troisinfotech.ca" })
+    userData({ user: "souren@openauto.ca" })
       .then((res) => {
         console.log(res);
       })

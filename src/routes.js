@@ -22,6 +22,7 @@ import Dashboard from "views/Dashboard/Dashboard.jsx";
 // import LoginPage from "views/Pages/LoginPage.jsx";
 import Snotify from "views/Snotify/Snotify.jsx";
 import Couponizer from "views/Couponizer/Couponizer.jsx";
+import Help from "views/Help/Help.jsx";
 
 import RoleManager from "views/RoleManager/RoleManager.jsx";
 
@@ -45,6 +46,13 @@ let routes = [
     name: "Couponizer",
     icon: "now-ui-icons shopping_tag-content",
     component: Couponizer,
+    layout: "/admin"
+  },
+  {
+    path: "/help",
+    name: "Help",
+    icon: "now-ui-icons objects_support-17",
+    component: Help,
     layout: "/admin"
   },
   {
