@@ -2,7 +2,7 @@
   "name": "kyada",
   "version": "1.0.0",
   "private": true,
-  "homepage": "https://app.tecotaxi.com",
+  "homepage": "https://app.tecotaxi.ca",
   "dependencies": {
     "@brainhubeu/react-carousel": "^1.12.9-alpha",
     "@sentry/browser": "^5.10.2",

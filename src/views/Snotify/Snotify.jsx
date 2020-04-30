@@ -11,7 +11,7 @@ import NotificationAlert from "react-notification-alert";
 // reactstrap components
 import { Card, CardBody, Row, Col } from "reactstrap";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import { FormGroup, Label, Input, Button } from "reactstrap";
+import { FormGroup, Label, Input, Button, Spinner } from "reactstrap";
 
 
 // core components
@@ -30,6 +30,7 @@ class Snotify extends React.Component {
         to: '',
         name: '',
         cabNum: '',
+        messageBlock: '',
       },
       selectedOption: null,
       submitting: false,
@@ -40,26 +41,28 @@ class Snotify extends React.Component {
   }
   notificationAlert = React.createRef();
 
-  userDatalist() {
-    const userData = Firebase.functions().httpsCallable('userData');
-    userData({user: "rakesh@troisinfotech.ca"});
-  }
+  // userDatalist() {
+  //   const userData = Firebase.functions().httpsCallable('userData');
+  //   userData({user: "rakesh@troisinfotech.ca"});
+  // }
 
   onSubmit(event) {
     event.preventDefault();
     this.setState({ submitting: true });
     const sendSMS = Firebase.functions().httpsCallable('sendSMS');
-    sendSMS({ to: this.state.message.to, name: this.state.message.name, cabNum: this.state.message.cabNum, bodyType: this.state.selectedOption })
+    sendSMS({ to: this.state.message.to, name: this.state.message.name, cabNum: this.state.message.cabNum, bodyType: this.state.selectedOption, messageBlock: this.state.message.messageBlock })
       .then(() => {
 
         this.setState({
-          error: false,
-          submitting: false,
           message: {
             to: '',
             name: '',
             cabNum: '',
-          }
+            messageBlock: '',
+          },
+          selectedOption: null,
+          submitting: false,
+          error: false,
         });
         this.notificationAlert.current.notificationAlert({
           //place bc: Is not british columbia haha, it means bottom corner. Notice where
@@ -120,7 +123,7 @@ class Snotify extends React.Component {
                     <FormGroup>
                       <Label>Name: </Label>
                       <Input
-                        type="tel"
+                        type="text"
                         name="name"
                         id="name"
                         placeholder="Recipient Name"
@@ -131,7 +134,8 @@ class Snotify extends React.Component {
                     <FormGroup>
                       <Label>Cab #: </Label>
                       <Input
-                        type="tel"
+                        type="number"
+                        min="0"
                         name="cabNum"
                         id="cabNum"
                         placeholder="Recipient assigned cab number"
@@ -150,7 +154,70 @@ class Snotify extends React.Component {
                         onChange={this.onHandleChange}
                       />
                     </FormGroup>
-                    <FormGroup check className="form-check-radio">
+                    <FormGroup>
+                      <Label>* Message: </Label>
+                      <FormGroup check className="form-check-radio" style={{ paddingLeft: 5 }}>
+                        <Label check>
+                          <Input
+                            defaultValue="1"
+                            id="Radios"
+                            name="Radios"
+                            type="radio"
+                            onChange={(event) => this.onHandleOptionChange(event)}
+                          />
+                        10 Min <span className="form-check-sign" />
+                        </Label>
+                      </FormGroup>
+                      <FormGroup check className="form-check-radio" style={{ paddingLeft: 5 }}>
+                        <Label check>
+                          <Input
+                            defaultValue="2"
+                            id="Radios"
+                            name="Radios"
+                            type="radio"
+                            onChange={(event) => this.onHandleOptionChange(event)}
+                          />
+                        5 Min <span className="form-check-sign" />
+                        </Label>
+                      </FormGroup>
+                      <FormGroup check className="form-check-radio" style={{ paddingLeft: 5 }}>
+                        <Label check>
+                          <Input
+                            defaultValue="3"
+                            id="Radios"
+                            name="Radios"
+                            type="radio"
+                            onChange={(event) => this.onHandleOptionChange(event)}
+                          />
+                          Almost there <span className="form-check-sign" />
+                        </Label>
+                      </FormGroup>
+                      <FormGroup check className="form-check-radio" style={{ paddingLeft: 5 }}>
+                        <Label check>
+                          <Input
+                            defaultValue="4"
+                            id="Radios"
+                            name="Radios"
+                            type="radio"
+                            onChange={(event) => this.onHandleOptionChange(event)}
+                          />
+                          Other <span className="form-check-sign" />
+                        </Label>
+                      </FormGroup>
+                      {this.state.selectedOption == 4 ? <FormGroup>
+                        <Label for="exampleText">* Unique message: </Label>
+                        <Input
+                          type="textarea"
+                          name="messageBlock"
+                          id="messageBlock"
+                          placeholder="Please write your message here"
+                          value={this.state.message.messageBlock}
+                          onChange={this.onHandleChange}
+                        />
+                      </FormGroup> : <></>}
+                    </FormGroup>
+
+                    {/* <FormGroup  className="form-check-radio">
                       <Label>* Message: </Label>
                       <br />
                       <Label check>
@@ -185,22 +252,14 @@ class Snotify extends React.Component {
                         />
                         Almost there<span className="form-check-sign" />
                       </Label>
-                      {/* <Input
-                        type="textarea"
-                        name="body"
-                        id="body"
-                        placeholder="Type here your SMS message..."
-                        value={this.state.message.body}
-                        onChange={this.onHandleChange}
-                      /> */}
-                    </FormGroup>
+                    </FormGroup> */}
                     <Button disabled={this.state.submitting} style={{ width: 100 }} color="info" type="submit" className="mt-3">
-                      Send
+                      {this.state.submitting ? <Spinner size="sm" color="light" /> :  "Send"}
                     </Button>
                   </form>
-                  <Button style={{ width: 100 }} color="info" onClick={() => this.userDatalist()} className="mt-3">
+                  {/* <Button style={{ width: 100 }} color="info" onClick={() => this.userDatalist()} className="mt-3">
                       zzz
-                    </Button>
+                    </Button> */}
                 </CardBody>
               </Card>
             </Col>

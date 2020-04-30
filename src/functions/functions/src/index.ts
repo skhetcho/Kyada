@@ -8,10 +8,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
-//import google spreadsheet module and promisify
-// const GoogleSpreadsheet = require('google-spreadsheet');
-// const { promisify } = require('util');
-
 //initialize admin sdk
 const serviceAccount = require("../src/kyada-core-756623444243.json");
 admin.initializeApp({
@@ -23,7 +19,19 @@ admin.initializeApp({
 const db = admin.firestore();
 const increment = admin.firestore.FieldValue.increment(1)
 
+// 3rd party modules
+// const { GoogleSpreadsheet } = require('google-spreadsheet');
+
+// 3rd module inits
+
+// spreadsheet key is the long id in the sheets URL
+// const doc = new GoogleSpreadsheet('1_OJFVP7fEKUYz9iYMbebOf2BmiGA-RHtujutzl2p5W8');
+
+
+
 {/*
+    COMMENTS:
+    
     sendSMS: receive message information and initiate
     an SMS send request to the twilio SMS API
 */}
@@ -45,6 +53,9 @@ exports.sendSMS = functions.https.onCall((message, context) => {
                 if (message.to === null || message.bodyType === null) {
                     reject(false);
                 }
+                else if (message.bodyType == 4 && message.messageBlock == '') {
+                    reject(false);
+                }
                 else {
                     let body;
                     let data: any;
@@ -53,31 +64,29 @@ exports.sendSMS = functions.https.onCall((message, context) => {
                         data = {
                             'bodyType1': increment
                         }
-                        body = "Hi" + (message.name ? (" " + message.name + ", ") : "! ") + "It's Teco Taxi. Your cab" + (message.cabNum ? (" #" + message.cabNum) + " will be here in about 10 minutes. \n\nNote: This is a 'do not reply number'" : " will be here in about 10 minutes \n\nNote: This is a 'do not reply number'");
+                        body = "Hi" + (message.name ? (" " + message.name + ", ") : "! ") + "It's Teco Taxi. Your cab" + (message.cabNum ? (" #" + message.cabNum) + " will be here in about 10 minutes. \n\nNote: This is a 'do not reply number'" : " will be here in about 10 minutes \n\nNote: This is a 'do not reply' number");
                     }
                     else if (message.bodyType == 2) {
                         data = {
                             'bodyType2': increment
                         }
-                        body = "Hi" + (message.name ? (" " + message.name + ", ") : "! ") + "It's Teco Taxi. Your cab" + (message.cabNum ? (" #" + message.cabNum) + " will be here in about 5 minutes. \n\nNote: This is a 'do not reply number'" : " will be here in about 5 minutes. \n\nNote: This is a 'do not reply number'");
+                        body = "Hi" + (message.name ? (" " + message.name + ", ") : "! ") + "It's Teco Taxi. Your cab" + (message.cabNum ? (" #" + message.cabNum) + " will be here in about 5 minutes. \n\nNote: This is a 'do not reply number'" : " will be here in about 5 minutes. \n\nNote: This is a 'do not reply' number");
                     }
                     else if (message.bodyType == 3) {
                         data = {
                             'bodyType3': increment
                         }
-                        body = "Hi" + (message.name ? (" " + message.name + ", ") : "! ") + "It's Teco Taxi. Your cab" + (message.cabNum ? (" #" + message.cabNum) + " is almost here! \n\nNote: This is a 'do not reply number'" : " is almost here! \n\nNote: This is a 'do not reply number'");
+                        body = "Hi" + (message.name ? (" " + message.name + ", ") : "! ") + "It's Teco Taxi. Your cab" + (message.cabNum ? (" #" + message.cabNum) + " is almost here! \n\nNote: This is a 'do not reply number'" : " is almost here! \n\nNote: This is a 'do not reply' number");
+                    }
+                    else if (message.bodyType == 4) {
+                        data = {
+                            'bodyType4': increment
+                        }
+                        body = "Hi" + (message.name ? (" " + message.name + ", ") : "! ") + "It's Teco Taxi." + (message.cabNum ? ("Your cab is #" + message.cabNum + ".") : "" ) + ("\n" + message.messageBlock + "\n\nNote: This is a 'do not reply number'");
                     }
                     else {
                         reject(false);
                     }
-                    // increment total count of messages per organization of the individual
-                    // add new message data under the individual's collection
-                    // each message should be a separate document
-                    // the message document should include:
-                    // receiver number
-                    // selected message id (the one from above ^: either 1, 2, 3) ie: message.bodyType
-                    // ^^^^^ this would allow us to observe when the dispatcher decides mostly to send the message
-                    // the date of the message (per day only)
 
                     client.messages
                         .create({
@@ -101,64 +110,126 @@ exports.sendSMS = functions.https.onCall((message, context) => {
                             // @ts-ignore
                             const organizationCollectionRef = db.collection(`${context.auth.token.company[0]}`)
 
-                            const batch = db.batch();
+                            // const majorCountBatch = db.batch();
+                            // const minorDocBatch = db.batch();
 
-                            batch.set(individualCollectionRef.doc('totalCounts'), data, { merge: true }); //increment the total count of the specified body for an individual
+                            // in the following batch.set instructions some of them have merge: true
+                            // because we are incrementing the counter thus we want to merge it with the
+                            // previous data
 
-                            batch.set(
-                                individualCollectionRef
-                                    .doc(`${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}`)
-                                    .collection(`${d.getHours()}`)
-                                    .doc(), {
-                                timeStampExact: d,
-                                bodyType: message.bodyType,
-                                cabNum: message.cabNum,
-                                clientName: message.name,
-                                clientPhoneNumber: message.to
-                            })//add message data ub 
+                            // majorCountBatch.set(individualCollectionRef.doc('totalCounts'), data, { merge: true }); //increment the general total count of the specified body for an individual
 
-                            batch.set(individualCollectionRef
-                                .doc(`${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}`)
-                                .collection("totalDailyCounts")
-                                .doc("bodyTypeCounts"), data, { merge: true })
-                            batch.set(organizationCollectionRef.doc('messages'), { totalMessages: increment }, { merge: true }); //increment the total count for the organization
-                            batch.commit()
-                                .catch((error) => {
-                                    console.log("error with firestore sendSMS function - batch.commit catch error: " + error)
-                                });
-                        })
-                        .then(async function () {
-                            console.log("start here:")
-                            // const doc = new GoogleSpreadsheet('1_OJFVP7fEKUYz9iYMbebOf2BmiGA-RHtujutzl2p5W8'); //this is messageFlow spreadsheet
-                            // await promisify(doc.useServiceAccountAuth)(
-                            //     {
-                            //         "type": "service_account",
-                            //         "project_id": "message-listsheet",
-                            //         "private_key_id": "3d684dee86e369f0a34cd0ecdb62334b2e35e0bd",
-                            //         "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDObHWN0f+03JFS\n88zMNItIUlYqNB0/pnUuex9N/shGQo9ZwDdQFZ9e7Wa2owl7JpqMrMjhMSc3YMHf\niB2pCAxBhVMWxwgRcC/D16WxTSv1GIHW0MhA2xL3DkWbkKUhjpjHFzz0UnpDU/Qk\nvWt0H7VEfPLuCSUb4Yhw6WRhYqaEIsBCReyFJr8c5lG0Sdm8JJ1wfTH/wRwhj4jJ\nIeKK+4eeaO1rcUSSQ+twhWZ6QTadhSEPAZKYmO3oaC3yEAfzg15W0Qgl4ylWhbq6\n5z782tLhadCbpxHzt2LPg24fdijQ/th8GCu2cfkG2B6ex7XkvPRDRxxYV59OJE46\nUwnixkcBAgMBAAECggEAE4Af1inQVWvVgg0hu+l7fksM9HK05VDv1q1vRnp7Eqwc\nsmFcDaw6ld3+gI1utVwZveVgGr9T0Zb0lGMy+MdtBPmNNmR6CM+yK3b2olpvJyR4\nC5ebULPWxaZrAVMM+S++k2bzbVn8o9n4AUqFrqmE1yH9/xUNFOZdnIZn4w1N5sMy\ntKUvX9VqX2ou4eVFmrxto2B2BdFNA798dTDNxTjn3HlJrOKTxJMCyyH/nf/fwmSU\nxnA0GA+PWXtcCWGMQlSOEe61svrbfPE1yWX5YRZDpW4weiu5vhSP6LvEp39Cr2fW\nChz2VQATLrjs9WB4ZJglmcakMMgE7gVZsF+l+uJHEwKBgQD8jKU8KtMeVC2Ngl+k\nTygXvl7Bl1iVpo1mfHJYYRegM9PbLFKmOoNRRK6XwsNRTHVLUnFKLhfMFDuHdnBT\nhGkUIOJTRgHXqG8600GfN8EYcdRAz7T3ZN/7V8365qAqAyGw2hG2Hsgpvyz3CdYD\n35AY+eOMtIykwuBqmsE1+6ePnwKBgQDRPno9e+BhFCzF7ashZEYvKO6MC5DeUWr5\nLWTpr6lZma/MIbzHqH7x8yFdFQ7+SZWQrruw+/Uwen45hk1faUXzsBuc/pDa0rOK\nnB5jCEJvD9xT7cLRTVMiovBgnFwzVNyCYDtMjgvsgiqXpXrYtqpIC5Uc1jy2/dGM\nwo7NMGolXwKBgATyrHoVTLWXaJ0RJNaPRnXQoQKh+HZWIQcVARiCLnhRC6GLqMLg\n+pmpAtKuWi1JljK3lsihRo4VB2WMCH9aZMSkMEr5YCfdgPBiGzMHYJ0d/c6XQzBl\npY3DFqIHyrOIBCz22Mn8qGdI+5SLeMnyo1wZ6T9keizwNH1iMs7f81R5AoGAJMl5\nMEoRHsAvRvUL+yjn9e6aUeDOrWdfCUPj0/ngKjKM57SevfNvrhXyrazAIBDLzM4L\njYgeiVFf07k67SVS+Q7jK+zNhss4aYwdA4g2NdRyBgdtEuMnVJWU8UdMJnIq+nj0\ns/bdPc18s4CSYntq4JO4uYMo1Xs2Vir2dDio0L0CgYAebzw0yLq2wHeGegOc55bI\nPlSB51pAX7vQaMYZsQcTodBd/mWMqiaeiC5SODwdIUnvqz9NsVUZelOxPXNWUqaV\nHgbOvZrYM22v5y5wmVwFElOpB0Bz8pCpyeJ+2SzjXs44bOEDxzEXz7I5dmbe1LZs\nmtJRY91WtQOp6jo+YhweGg==\n-----END PRIVATE KEY-----\n",
-                            //         "client_email": "sheets@message-listsheet.iam.gserviceaccount.com",
-                            //         "client_id": "102918684930848164201",
-                            //         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                            //         "token_uri": "https://oauth2.googleapis.com/token",
-                            //         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                            //         "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sheets%40message-listsheet.iam.gserviceaccount.com"
-                            //     }
-                            // );
-                            // const info = await promisify(doc.getInfo)();
-                            // const sheet = info.worksheets[0];
-                            // console.log(`Title sheet: ${sheet.title}`);
-                            // const row = {
-                            //     // @ts-ignore
-                            //     sender: admin.auth().getUser(context.auth.uid),
-                            //     timeStamp: d,
+                            // minorDocBatch.set(
+
+                            //     // COMMENTS
+                            //     // add message data firebase
+                            //     // the hierarchy of the following code in firestore looks something like this
+                            //     // 'company'/messages/user-uid/14-3-2020/9/doc-uid
+                            //     // in the doc-uid the below data goes under
+                            //     //
+                            //     // 14-3-2020: is the sent message date
+                            //     // 9: is which hour it has been send
+                            //     // NOTE: those dates and times are based on UT/Greenwich
+                            //     // 'company': is the name of the company in the db
+                            //     individualCollectionRef
+                            //         .doc(`${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}`)
+                            //         .collection(`${d.getHours()}`)
+                            //         .doc(), {
+                            //     timeStampExact: d,
                             //     bodyType: message.bodyType,
-                            //     cabNumber: message.cabNum,
+                            //     cabNum: message.cabNum,
                             //     clientName: message.name,
                             //     clientPhoneNumber: message.to
-                            // }
-                            // await promisify(sheet.addRow)(row)
-                        }
-                        )
+                            // })
+                            individualCollectionRef.doc('totalCounts').set({
+                                data
+                            }, { merge: true })
+                                .catch((error) => {
+                                    console.log("individual general total count set failed: " + error)
+                                })
+                            individualCollectionRef
+                                .doc(`${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}`)
+                                .collection(`${d.getHours()}`)
+                                .doc()
+                                .set({
+                                    timeStampExact: d,
+                                    bodyType: message.bodyType,
+                                    cabNum: message.cabNum,
+                                    clientName: message.name,
+                                    clientPhoneNumber: message.to
+                                })
+                                .then(() => {
+                                    individualCollectionRef
+                                        .doc(`${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}`)
+                                        .collection("totalDailyCounts")
+                                        .doc("bodyTypeCounts").set({
+                                            data
+                                        }, { merge: true })
+                                        .catch((error) => {
+                                            console.log("individual daily total count failed: " + error);
+                                        })
+                                })
+                                .catch((error) => {
+                                    console.log("individual new message detail set document failed: " + error)
+                                })
+                            organizationCollectionRef
+                                .doc('messages')
+                                .set({
+                                    totalMessages: increment
+                                }, { merge: true })
+                                .catch((error) => {
+                                    console.log("organization total general count failed: " + error);
+                                })
+
+
+
+                            // minorDocBatch.set(individualCollectionRef
+
+                            //     // COMMENTS:
+                            //     // the hierarchy of the following code looks something like the this
+                            //     // 'company'/messages/user-uid/14-3-2020/totalDailyCounts/bodyTypeCounts/
+                            //     // in here we have three counts, no additional unique id documents
+                            //     // the three counts look something like:
+                            //     // bodyType1: 3
+                            //     // bodyType2: 0
+                            //     // bodyType3: 1
+                            //     // 14-3-2020: is the sent message date
+                            //     // 9: is which hour it has been send
+                            //     // NOTE: those dates and times are based on UT/Greenwich
+                            //     // 'company': is the name of the company in the db
+
+                            //     // for future implementations we can add other data types to be gathered
+                            //     // under totalDailyCounts if we wished to. May the force be with you 
+
+                            //     .doc(`${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}`)
+                            //     .collection("totalDailyCounts")
+                            //     .doc("bodyTypeCounts"), data, { merge: true })
+
+                            // here we can see a similar increment of the total number of messags per company
+                            // majorCountBatch.set(organizationCollectionRef.doc('messages'), { totalMessages: increment }, { merge: true }); //increment the total count for the organization
+
+                            // COMMENTS:
+                            // batch would fail and not commit unless all the batch sets are successfuly
+                            // preventing mishandled data and unset properties.
+                            // this is important to ensure the data that has been captured makes sense
+                            // accross all gathered data.
+                            // NOTE: IF one of the sets fails the entire commit is fails but that doesn't guarantee
+                            // that the sms hasn't sent. However, if the sms fails to send then definitely the batch
+                            // setting would not execute
+                            // minorDocBatch.commit()
+                            //     .then(() => {
+                            //         majorCountBatch.commit()
+                            //             .catch((error) => {
+                            //                 console.log("error with firestore sendSMS function - majorCountBatch.commit catch error: " + error)
+                            //             })
+                            //     })
+                            //     .catch((error) => {
+                            //         console.log("error with firestore sendSMS function - batch.commit catch error: " + error)
+                            //     });
+                        })
+                        .then(() => {
+                            console.log('completed')
+                        })
                         .catch(function () {
                             reject(false);
                         });
@@ -168,7 +239,11 @@ exports.sendSMS = functions.https.onCall((message, context) => {
     }
 });
 
+
+
 {/*
+    COMMENTS:
+    
     addUserAsAdmin: receive pre-registered user email
     add new custom claim "admin: true" to grant admin
     privilages
@@ -219,8 +294,9 @@ exports.addUserAsAdmin = functions.https.onCall((data, context) => {
                 }
             })
     }
-    // }
 });
+
+
 
 {/*
     userData: function log the user custom claim
@@ -241,6 +317,8 @@ exports.userData = functions.https.onCall((data, context) => {
 });
 
 {/*
+    COMMENTS:
+    
     addUserAsEmployee: receive registration data
     (email, password, etc...) and create user account
     add custom claims to the user profile which are
