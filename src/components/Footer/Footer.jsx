@@ -35,7 +35,7 @@ class Footer extends React.Component {
                   className="mr-4-px"
                   target="_blank"
                 >
-                  Teco Taxi
+                  Zappy
                 </a>
               </li>
               <li>

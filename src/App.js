@@ -1,6 +1,6 @@
 /*
 
-Coded by Kyada for Teco Taxi
+Coded by Zappy
 
 */
 import React from "react";

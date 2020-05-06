@@ -216,50 +216,10 @@ class Snotify extends React.Component {
                         />
                       </FormGroup> : <></>}
                     </FormGroup>
-
-                    {/* <FormGroup  className="form-check-radio">
-                      <Label>* Message: </Label>
-                      <br />
-                      <Label check>
-                        <Input
-                          defaultValue="1"
-                          id="Radios"
-                          name="Radios"
-                          type="radio"
-                          onChange={(event) => this.onHandleOptionChange(event)}
-                        />
-                        10 Min<span className="form-check-sign" />
-                      </Label>
-                      <br />
-                      <Label check>
-                        <Input
-                          defaultValue="2"
-                          id="Radios"
-                          name="Radios"
-                          type="radio"
-                          onChange={(event) => this.onHandleOptionChange(event)}
-                        />
-                        5 Min<span className="form-check-sign" />
-                      </Label>
-                      <br />
-                      <Label check>
-                        <Input
-                          defaultValue="3"
-                          id="Radios"
-                          name="Radios"
-                          type="radio"
-                          onChange={(event) => this.onHandleOptionChange(event)}
-                        />
-                        Almost there<span className="form-check-sign" />
-                      </Label>
-                    </FormGroup> */}
                     <Button disabled={this.state.submitting} style={{ width: 100 }} color="info" type="submit" className="mt-3">
                       {this.state.submitting ? <Spinner size="sm" color="light" /> :  "Send"}
                     </Button>
                   </form>
-                  {/* <Button style={{ width: 100 }} color="info" onClick={() => this.userDatalist()} className="mt-3">
-                      zzz
-                    </Button> */}
                 </CardBody>
               </Card>
             </Col>

@@ -170,7 +170,7 @@ class Sidebar extends React.Component {
               className="simple-text logo-normal"
               target="_blank"
             >
-              Teco Taxi
+              Zappy
             </a>
             <div className="navbar-minimize">
               <Button

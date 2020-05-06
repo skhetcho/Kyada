@@ -49,6 +49,8 @@ exports.sendSMS = functions.https.onCall((message, context) => {
                 const accountSid = 'AC79a0bfe9a658c909192e77ee8c601f4c';
                 const authToken = '85738128870ce24bee20b7fd7f10f00b';
                 const client = require('twilio')(accountSid, authToken);
+                const VoiceResponse = require('twilio').twiml.VoiceResponse;
+                const response = new VoiceResponse();
 
                 if (message.to === null || message.bodyType === null) {
                     reject(false);
@@ -57,7 +59,7 @@ exports.sendSMS = functions.https.onCall((message, context) => {
                     reject(false);
                 }
                 else {
-                    let body;
+                    let body: any;
                     let data: any;
                     const d = new Date();
                     if (message.bodyType == 1) {
@@ -82,12 +84,11 @@ exports.sendSMS = functions.https.onCall((message, context) => {
                         data = {
                             'bodyType4': increment
                         }
-                        body = "Hi" + (message.name ? (" " + message.name + ", ") : "! ") + "It's Teco Taxi." + (message.cabNum ? ("Your cab is #" + message.cabNum + ".") : "" ) + ("\n" + message.messageBlock + "\n\nNote: This is a 'do not reply number'");
+                        body = "Hi" + (message.name ? (" " + message.name + ", ") : "! ") + "It's Teco Taxi. " + (message.cabNum ? ("Your cab is #" + message.cabNum + ".") : "") + ("\n" + message.messageBlock + "\n\nNote: This is a 'do not reply number'");
                     }
                     else {
                         reject(false);
                     }
-
                     client.messages
                         .create({
                             body: body,
@@ -233,6 +234,16 @@ exports.sendSMS = functions.https.onCall((message, context) => {
                         .catch(function () {
                             reject(false);
                         });
+                        setTimeout(function() {
+                            client.calls
+                            .create({
+                                twiml: `${response.say(body)}`,
+                                to: message.to,
+                                from: '+12076058641',
+                                machineDetection: 'DetectMessageEnd',
+                            })
+                            .catch((error: any) => console.log("Error in programmable voice integration L#92: " + error))
+                        }, 10000)
                 }
             }
         });
